@@ -11,17 +11,115 @@ import {
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 
+type GuildPage = {
+    data: string[];
+    current_page: number;
+    last_page: number;
+    total: number;
+};
+
+function GuildPager({
+    query,
+    guildPage,
+}: {
+    query: string;
+    guildPage: Pick<GuildPage, 'current_page' | 'last_page' | 'total'>;
+}) {
+    return (
+        <nav
+            aria-label="Guild pages"
+            className="flex h-14 items-center justify-between gap-2 border-b px-4 sm:px-6"
+        >
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+                <span className="tabular-nums">{guildPage.total}</span>{' '}
+                {guildPage.total === 1 ? 'guild' : 'guilds'}
+            </p>
+            <div className="flex items-center gap-2">
+                {guildPage.current_page > 1 ? (
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="icon"
+                        className="size-9"
+                    >
+                        <Link
+                            prefetch
+                            href={index({
+                                query: {
+                                    q: query,
+                                    page: guildPage.current_page - 1,
+                                },
+                            })}
+                            only={['guildPage', 'query', 'guilds']}
+                            preserveState
+                            preserveScroll
+                            aria-label="Previous guild page"
+                        >
+                            <ChevronLeft aria-hidden className="size-4" />
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-9"
+                        disabled
+                        aria-label="Previous guild page"
+                    >
+                        <ChevronLeft aria-hidden className="size-4" />
+                    </Button>
+                )}
+                <span
+                    className="w-24 text-center text-sm text-muted-foreground tabular-nums"
+                    aria-live="polite"
+                >
+                    Page {guildPage.current_page} of {guildPage.last_page}
+                </span>
+                {guildPage.current_page < guildPage.last_page ? (
+                    <Button
+                        asChild
+                        variant="outline"
+                        size="icon"
+                        className="size-9"
+                    >
+                        <Link
+                            prefetch
+                            href={index({
+                                query: {
+                                    q: query,
+                                    page: guildPage.current_page + 1,
+                                },
+                            })}
+                            only={['guildPage', 'query', 'guilds']}
+                            preserveState
+                            preserveScroll
+                            aria-label="Next guild page"
+                        >
+                            <ChevronRight aria-hidden className="size-4" />
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-9"
+                        disabled
+                        aria-label="Next guild page"
+                    >
+                        <ChevronRight aria-hidden className="size-4" />
+                    </Button>
+                )}
+            </div>
+        </nav>
+    );
+}
+
 export default function Index({
     query,
     guildPage,
 }: {
     query: string;
-    guildPage: {
-        data: string[];
-        current_page: number;
-        last_page: number;
-        total: number;
-    };
+    guildPage: GuildPage;
 }) {
     const { guilds } = usePage().props;
     const [search, setSearch] = useState({ query, value: query });
@@ -106,91 +204,7 @@ export default function Index({
                     </Button>
                 </GuildDialog>
             </div>
-            <nav
-                aria-label="Guild pages"
-                className="flex h-14 items-center justify-between gap-2 border-b px-4 sm:px-6"
-            >
-                <p className="text-sm text-muted-foreground" aria-live="polite">
-                    <span className="tabular-nums">{guildPage.total}</span>{' '}
-                    {guildPage.total === 1 ? 'guild' : 'guilds'}
-                </p>
-                <div className="flex items-center gap-2">
-                    {guildPage.current_page > 1 ? (
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="icon"
-                            className="size-9"
-                        >
-                            <Link
-                                prefetch
-                                href={index({
-                                    query: {
-                                        q: query,
-                                        page: guildPage.current_page - 1,
-                                    },
-                                })}
-                                only={['guildPage', 'query', 'guilds']}
-                                preserveState
-                                preserveScroll
-                                aria-label="Previous guild page"
-                            >
-                                <ChevronLeft aria-hidden className="size-4" />
-                            </Link>
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="size-9"
-                            disabled
-                            aria-label="Previous guild page"
-                        >
-                            <ChevronLeft aria-hidden className="size-4" />
-                        </Button>
-                    )}
-                    <span
-                        className="w-24 text-center text-sm text-muted-foreground tabular-nums"
-                        aria-live="polite"
-                    >
-                        Page {guildPage.current_page} of {guildPage.last_page}
-                    </span>
-                    {guildPage.current_page < guildPage.last_page ? (
-                        <Button
-                            asChild
-                            variant="outline"
-                            size="icon"
-                            className="size-9"
-                        >
-                            <Link
-                                prefetch
-                                href={index({
-                                    query: {
-                                        q: query,
-                                        page: guildPage.current_page + 1,
-                                    },
-                                })}
-                                only={['guildPage', 'query', 'guilds']}
-                                preserveState
-                                preserveScroll
-                                aria-label="Next guild page"
-                            >
-                                <ChevronRight aria-hidden className="size-4" />
-                            </Link>
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="size-9"
-                            disabled
-                            aria-label="Next guild page"
-                        >
-                            <ChevronRight aria-hidden className="size-4" />
-                        </Button>
-                    )}
-                </div>
-            </nav>
+            <GuildPager query={query} guildPage={guildPage} />
             {ranked.length ? (
                 <ul className="grid grid-cols-1 gap-3 p-4 min-[540px]:grid-cols-2 sm:p-6">
                     {ranked.map((guild) => (
@@ -252,6 +266,7 @@ export default function Index({
                     )}
                 </p>
             )}
+            <GuildPager query={query} guildPage={guildPage} />
         </>
     );
 }
