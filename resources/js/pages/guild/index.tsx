@@ -21,16 +21,21 @@ type GuildPage = {
 function GuildPager({
     query,
     guildPage,
+    announceStatus,
 }: {
     query: string;
     guildPage: Pick<GuildPage, 'current_page' | 'last_page' | 'total'>;
+    announceStatus: boolean;
 }) {
     return (
         <nav
             aria-label="Guild pages"
             className="flex h-14 items-center justify-between gap-2 border-b px-4 sm:px-6"
         >
-            <p className="text-sm text-muted-foreground" aria-live="polite">
+            <p
+                className="text-sm text-muted-foreground"
+                aria-live={announceStatus ? 'polite' : undefined}
+            >
                 <span className="tabular-nums">{guildPage.total}</span>{' '}
                 {guildPage.total === 1 ? 'guild' : 'guilds'}
             </p>
@@ -71,7 +76,7 @@ function GuildPager({
                 )}
                 <span
                     className="w-24 text-center text-sm text-muted-foreground tabular-nums"
-                    aria-live="polite"
+                    aria-live={announceStatus ? 'polite' : undefined}
                 >
                     Page {guildPage.current_page} of {guildPage.last_page}
                 </span>
@@ -204,7 +209,7 @@ export default function Index({
                     </Button>
                 </GuildDialog>
             </div>
-            <GuildPager query={query} guildPage={guildPage} />
+            <GuildPager query={query} guildPage={guildPage} announceStatus />
             {ranked.length ? (
                 <ul className="grid grid-cols-1 gap-3 p-4 min-[540px]:grid-cols-2 sm:p-6">
                     {ranked.map((guild) => (
@@ -266,7 +271,11 @@ export default function Index({
                     )}
                 </p>
             )}
-            <GuildPager query={query} guildPage={guildPage} />
+            <GuildPager
+                query={query}
+                guildPage={guildPage}
+                announceStatus={false}
+            />
         </>
     );
 }
